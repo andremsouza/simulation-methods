@@ -1,3 +1,7 @@
+// Simulation Header, with definition to the Simulation class.
+// TODO: Extend documentation
+
+
 #ifndef MD_OPTNONE_SIMULATION_H_
 #define MD_OPTNONE_SIMULATION_H_
 
@@ -28,6 +32,8 @@ namespace MD {
 
             // public methods
 
+            
+            // Runs simulation, based on the class' parameters
             void runSimulation(int t_total_time=100000, int t_echo_time=1000,
                                int t_movie_time=100);
 
@@ -54,27 +60,39 @@ namespace MD {
             // private methods
 
 
+            // calculates the shortest distance between 2 points in a PBC configuration
+            // only used in the random deposition check which happens once at initialization
+            // so this is not so time crucial left the square root inside
             double distanceFoldedPBC(double x0, double y0, double x1,
                                      double y1);
-            
 
+
+            // calculates the shortest distance squared between 2 points in a PBC configuration
+            // this is squared because I want to save on sqrt with the lookup table
+            // also used by the Verlet rebuild flag check where I check how much a particle moved
             void distanceFoldedPBCSquared(double x0, double y0, double x1,
                                           double y1, double *r2_return,
                                           double *dx_return, double *dy_return);
-            
 
+
+            // fold back the particle into the PBC simulation box
+            // assumes it did not jump more than a box length
+            // if it did the simulation is already broken anyhow
             void foldParticleBackPBC(int i);
-            
 
+
+            // calculates external forces on each particle
             void calcExternalForcesOnParticles();
 
 
+            // calculates pairwise forces between particles
             void calcPairwiseForces();
 
 
+            // moves the particles one time step
             void moveParticles();
 
-
+            // Writes current scenario to .mvi file as a new frame
             void writeCMovieFrame();
     };
 }

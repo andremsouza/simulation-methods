@@ -1,9 +1,9 @@
+// Implementation file for "simulation.hpp"
+// TODO: Extend documentation
+
 #include "simulation.hpp"
 
 
-// calculates the shortest distance between 2 points in a PBC configuration
-// only used in the random deposition check which happens once at initialization
-// so this is not so time crucial left the square root inside
 double MD::Simulation::distanceFoldedPBC(double x0, double y0, double x1,
                                            double y1) {
     double dx = x1 - x0, dy = y1 - y0;
@@ -20,9 +20,6 @@ double MD::Simulation::distanceFoldedPBC(double x0, double y0, double x1,
 }
 
 
-// calculates the shortest distance squared between 2 points in a PBC configuration
-// this is squared because I want to save on sqrt with the lookup table
-// also used by the Verlet rebuild flag check where I check how much a particle moved
 void MD::Simulation::distanceFoldedPBCSquared(double x0, double y0, double x1,
                                               double y1, double *r2_return,
                                               double *dx_return,
@@ -43,7 +40,22 @@ void MD::Simulation::distanceFoldedPBCSquared(double x0, double y0, double x1,
 }
 
 
-// calculates external forces on each particle
+void MD::Simulation::foldParticleBackPBC(int i) {
+    if(m_particle_x[i] < 0) {
+        m_particle_x[i] += m_sx;
+    }
+    if(m_particle_y[i] < 0) {
+        m_particle_y[i] += m_sy;
+    }
+    if(m_particle_x[i] >= m_sx) {
+        m_particle_x[i] -= m_sx;
+    }
+    if(m_particle_y[i] >= m_sy) {
+        m_particle_y[i] -= m_sy;
+    }
+}
+
+
 void MD::Simulation::calcExternalForcesOnParticles() {
     for(int i = 0; i < m_n_particles; i++) {
         m_particle_fx[i] += m_particle_direction[i] * m_particle_driving_force;
@@ -51,7 +63,6 @@ void MD::Simulation::calcExternalForcesOnParticles() {
 }
 
 
-// calculates pairwise forces between particles
 void MD::Simulation::calcPairwiseForces() {
     for(int i = 0; i < m_n_particles; i++) {
         for(int j = i + 1; j < m_n_particles; j++) {
@@ -87,26 +98,6 @@ void MD::Simulation::calcPairwiseForces() {
 }
 
 
-// fold back the particle into the PBC simulation box
-// assumes it did not jump more than a box length
-// if it did the simulation is already broken anyhow
-void MD::Simulation::foldParticleBackPBC(int i) {
-    if(m_particle_x[i] < 0) {
-        m_particle_x[i] += m_sx;
-    }
-    if(m_particle_y[i] < 0) {
-        m_particle_y[i] += m_sy;
-    }
-    if(m_particle_x[i] >= m_sx) {
-        m_particle_x[i] -= m_sx;
-    }
-    if(m_particle_y[i] >= m_sy) {
-        m_particle_y[i] -= m_sy;
-    }
-}
-
-
-//moves the particles one time step
 void MD::Simulation::moveParticles() {
 
     for(int i = 0; i < m_n_particles; i++) {
@@ -151,8 +142,7 @@ void MD::Simulation::writeCMovieFrame() {
     }
 }
 
-// Constructor for Simulation class
-// Initializes all simulation parameters and variables
+
 MD::Simulation::Simulation(bool t_verbose,
                            int t_n_particles, double t_dt,
                            double t_particle_particle_screening_length,

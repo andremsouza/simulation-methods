@@ -1,8 +1,3 @@
-#include <iostream>
-#include "simulation.hpp"
-
-using namespace std;
-
 // Simulation Methods course, 2019
 // First Assignment: Molecular Dynamics (Brownian Dynamics) Simulation
 // 
@@ -19,6 +14,15 @@ using namespace std;
 // - the running time vs the system size for the three cases on the same graph
 // - be able to answer simple questions about the code probing your
 //   understanding of the code and the simulation
+
+#include <iostream>
+#include "simulation.hpp"
+
+using namespace std;
+
+
+// Main function. Runs simulation with default arguments.
+// TODO: Manage I/O through command line arguments.
 int main(int argc, char const *argv[]) {
     // Output general information and initialize simulation
     cout << "Simulation Methods Course, 2019" << endl;
