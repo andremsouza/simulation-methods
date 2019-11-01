@@ -13,9 +13,13 @@
 #include <vector>
 
 namespace MD {
-    // Constant particle density for each simulation
-    #define PARTICLE_DENSITY (800.0 / (60.0 * 60.0))
-    #define MINIMUM_DISTANCE (0.25)
+    //Defining constants
+    double constexpr PARTICLE_DENSITY = 800.0 / (60.0 * 60.0);
+    double constexpr MINIMUM_PLACEMENT_DISTANCE = 0.25;
+    double constexpr MINIMUM_INTERACTION_DISTANCE = 0.1;
+    double constexpr TOO_CLOSE_FORCE = 100.0;
+    double constexpr INTERACTION_THRESHOLD = 16.0;
+    double constexpr DIRECTION_PROBABILITY = 0.5;
 
     // Simulation class
     // Defines and control simulation
@@ -60,37 +64,9 @@ namespace MD {
             // private methods
 
 
-            // calculates the shortest distance between 2 points in a PBC configuration
-            // only used in the random deposition check which happens once at initialization
-            // so this is not so time crucial left the square root inside
-            double distanceFoldedPBC(double x0, double y0, double x1,
-                                     double y1);
-
-
-            // calculates the shortest distance squared between 2 points in a PBC configuration
-            // this is squared because I want to save on sqrt with the lookup table
-            // also used by the Verlet rebuild flag check where I check how much a particle moved
-            void distanceFoldedPBCSquared(double x0, double y0, double x1,
-                                          double y1, double *r2_return,
-                                          double *dx_return, double *dy_return);
-
-
-            // fold back the particle into the PBC simulation box
-            // assumes it did not jump more than a box length
-            // if it did the simulation is already broken anyhow
-            void foldParticleBackPBC(int i);
-
-
-            // calculates external forces on each particle
-            void calcExternalForcesOnParticles();
-
-
             // calculates pairwise forces between particles
             void calcPairwiseForces();
 
-
-            // moves the particles one time step
-            void moveParticles();
 
             // Writes current scenario to .mvi file as a new frame
             void writeCMovieFrame();

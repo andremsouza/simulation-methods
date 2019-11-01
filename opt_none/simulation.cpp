@@ -4,81 +4,32 @@
 #include "simulation.hpp"
 
 
-double MD::Simulation::distanceFoldedPBC(double x0, double y0, double x1,
-                                           double y1) {
-    double dx = x1 - x0, dy = y1 - y0;
-
-    //PBC fold back
-    //if any distance is larger than half the box
-    //the copy in the neighboring box is closer
-    if (dx > m_half_sx) dx -= m_sx;
-    if (dx <= -m_half_sx) dx += m_sx;
-    if (dy > m_half_sy) dy -= m_sy;
-    if (dy <= -m_half_sy) dy += m_sy;
-
-    return std::sqrt(dx * dx + dy * dy);
-}
-
-
-void MD::Simulation::distanceFoldedPBCSquared(double x0, double y0, double x1,
-                                              double y1, double *r2_return,
-                                              double *dx_return,
-                                              double *dy_return) {
-    double dx = x1 - x0, dy = y1 - y0;
-
-    //PBC fold back
-    //if any distance is larger than half the box
-    //the copy in the neighboring box is closer
-    if (dx > m_half_sx) dx -= m_sx;
-    if (dx <= -m_half_sx) dx += m_sx;
-    if (dy > m_half_sy) dy -= m_sy;
-    if (dy <= -m_half_sy) dy += m_sy;
-
-    *r2_return = dx*dx + dy*dy;
-    *dx_return = dx;
-    *dy_return = dy;
-}
-
-
-void MD::Simulation::foldParticleBackPBC(int i) {
-    if(m_particle_x[i] < 0) {
-        m_particle_x[i] += m_sx;
-    }
-    if(m_particle_y[i] < 0) {
-        m_particle_y[i] += m_sy;
-    }
-    if(m_particle_x[i] >= m_sx) {
-        m_particle_x[i] -= m_sx;
-    }
-    if(m_particle_y[i] >= m_sy) {
-        m_particle_y[i] -= m_sy;
-    }
-}
-
-
-void MD::Simulation::calcExternalForcesOnParticles() {
-    for(int i = 0; i < m_n_particles; i++) {
-        m_particle_fx[i] += m_particle_direction[i] * m_particle_driving_force;
-    }
-}
-
-
 void MD::Simulation::calcPairwiseForces() {
     for(int i = 0; i < m_n_particles; i++) {
         for(int j = i + 1; j < m_n_particles; j++) {
-            double r2, dx, dy;
-            // calculating distance between particles
-            distanceFoldedPBCSquared(m_particle_x[i], m_particle_y[i],
-                                     m_particle_x[j], m_particle_y[j],
-                                     &r2, &dx, &dy);
+            // calculating squared distance between particles
+            double dx = m_particle_x[j] - m_particle_x[i];
+            double dy = m_particle_y[j] - m_particle_y[i];
+            double r2;
+
+            //PBC fold back
+            //if any distance is larger than half the box
+            //the copy in the neighboring box is closer
+            if (dx > m_half_sx) dx -= m_sx;
+            if (dx <= -m_half_sx) dx += m_sx;
+            if (dy > m_half_sy) dy -= m_sy;
+            if (dy <= -m_half_sy) dy += m_sy;
+
+            r2 = dx*dx + dy*dy;
+
             //the particles are close enough to interact
-            if (r2 < 16.0){
+            if (r2 < INTERACTION_THRESHOLD){
                 double r = sqrt(r2), f;
                 
-                if (r < 0.1){
+                if (r < MINIMUM_INTERACTION_DISTANCE){
                     std::cout << "WARNING:PARTICLES TOO CLOSE. LOWER CUTOFF FORCE USED"
                         << std::endl;
-                    f = 100.0;
+                    f = TOO_CLOSE_FORCE;
                 }
                 else{
                     //calculate the force
@@ -98,38 +49,18 @@ void MD::Simulation::calcPairwiseForces() {
 }
 
 
-void MD::Simulation::moveParticles() {
-
-    for(int i = 0; i < m_n_particles; i++) {
-        double dx = m_particle_fx[i] * m_dt;
-        double dy = m_particle_fy[i] * m_dt;
-        
-        m_particle_x[i] += dx;
-        m_particle_y[i] += dy;
-    
-        foldParticleBackPBC(i);
-        
-        m_particle_fx[i] = 0.0;
-        m_particle_fy[i] = 0.0;
-        }
-}
-
-
 void MD::Simulation::writeCMovieFrame() {
     float floatholder;
-    int intholder;
 
-    intholder = m_n_particles;
-    m_moviefile.write(reinterpret_cast<char *> (&intholder), sizeof(int));
-
-    intholder = m_time;
-    m_moviefile.write(reinterpret_cast<char *> (&intholder), sizeof(int));
+    // writing frame data to .mvi
+    m_moviefile.write(reinterpret_cast<char *> (&m_n_particles), sizeof(int));
+    m_moviefile.write(reinterpret_cast<char *> (&m_time), sizeof(int));
 
     for(int i = 0; i < m_n_particles; i++) {
-        intholder = m_particle_color[i];
-        m_moviefile.write(reinterpret_cast<char *> (&intholder), sizeof(int));
-        intholder = i;//ID
-        m_moviefile.write(reinterpret_cast<char *> (&intholder), sizeof(int));
+        m_moviefile.write(reinterpret_cast<char *> (&(m_particle_color[i])),
+                          sizeof(int));
+        m_moviefile.write(reinterpret_cast<char *> (&i), sizeof(int));
+
         floatholder = (float)m_particle_x[i];
         m_moviefile.write(reinterpret_cast<char *> (&floatholder),
                           sizeof(float));
@@ -167,9 +98,8 @@ MD::Simulation::Simulation(bool t_verbose,
     // Calculating box size, based on the number of particles
     m_sx = m_sy = round(sqrt(m_n_particles/PARTICLE_DENSITY));
     m_half_sx = m_half_sy = m_sx / 2.0;
-    if(m_verbose) {
+    if(m_verbose)
         std::cout << "Box size = " << m_sx << " x " << m_sy << std::endl;
-    }
 
     // initializing particles
     m_particle_x.resize(m_n_particles);
@@ -180,12 +110,11 @@ MD::Simulation::Simulation(bool t_verbose,
     m_particle_color.resize(m_n_particles);
 
     // Try to assign a position to each particle
-    if(m_verbose) {
+    if(m_verbose)
         std::cout << "Random arrangement of particles initialized" << std::endl;
-    }
 
     for(int i = 0; i < m_n_particles; i++) {
-        double x_try = 0.0, y_try = 0.0, dr;
+        double x_try = 0.0, y_try = 0.0;
         bool overlap = true; // check overlap with other particles
         int n_trials = 0; // limit number of trials before giving up
 
@@ -197,9 +126,19 @@ MD::Simulation::Simulation(bool t_verbose,
             overlap = false;
 
             for(int j = 0; j < i; j++) {
-                dr = distanceFoldedPBC(x_try, y_try, m_particle_x[j],
-                                         m_particle_y[j]);
-                if(dr < MINIMUM_DISTANCE) {
+                // Calculating distances between particle i and others
+                double dx = m_particle_x[i] - x_try,
+                       dy = m_particle_y[i] - y_try;
+                
+                //PBC fold back
+                //if any distance is larger than half the box
+                //the copy in the neighboring box is closer
+                if (dx > m_half_sx) dx -= m_sx;
+                if (dx <= -m_half_sx) dx += m_sx;
+                if (dy > m_half_sy) dy -= m_sy;
+                if (dy <= -m_half_sy) dy += m_sy;
+
+                if(std::sqrt(dx * dx + dy * dy) < MINIMUM_PLACEMENT_DISTANCE) {
                     overlap = true;
                     n_trials++;
                     break;
@@ -219,7 +158,7 @@ MD::Simulation::Simulation(bool t_verbose,
         m_particle_fx[i] = 0.0;
         m_particle_fy[i] = 0.0;
 
-        if (std::rand()/(RAND_MAX+1.0)<0.5) {
+        if (std::rand() / (RAND_MAX + 1.0) < DIRECTION_PROBABILITY) {
             m_particle_direction[i] = -1.0;
             m_particle_color[i] = 2;
         }
@@ -251,9 +190,32 @@ void MD::Simulation::runSimulation(int t_total_time, int t_echo_time,
 
     // begin simulation
     for(m_time = 0; m_time < t_total_time; m_time++) {
-        calcExternalForcesOnParticles();
+        // calculating external forces on particles
+        for(int i = 0; i < m_n_particles; i++) {
+            m_particle_fx[i] += m_particle_direction[i]
+                * m_particle_driving_force;
+        }
+
+        // calculating pairwise forces between particles
         calcPairwiseForces();
-        moveParticles();
+
+        // moving particles
+        for(int i = 0; i < m_n_particles; i++) {
+            double dx = m_particle_fx[i] * m_dt;
+            double dy = m_particle_fy[i] * m_dt;
+            
+            m_particle_x[i] += dx;
+            m_particle_y[i] += dy;
+
+            // fold back if on border
+            if(m_particle_x[i] < 0) m_particle_x[i] += m_sx;
+            if(m_particle_y[i] < 0) m_particle_y[i] += m_sy;
+            if(m_particle_x[i] >= m_sx) m_particle_x[i] -= m_sx;
+            if(m_particle_y[i] >= m_sy) m_particle_y[i] -= m_sy;
+            
+            m_particle_fx[i] = 0.0;
+            m_particle_fy[i] = 0.0;
+        }
 
         // echo time
         if(m_time % t_echo_time == 0) {
