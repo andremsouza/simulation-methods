@@ -45,10 +45,12 @@ int main(int argc, char *argv[]) {
   const int movie_time = atoi(argv[8]);
 
   // Output general information
-  cout << "Simulation Methods Course, 2019" << endl;
-  cout << "#1 Assignment Molecular Dynamics (Brownian Dynamics) simulation"
-       << endl;
-  cout << "Unoptimized version (slowest)" << endl;
+  if (verbose) {
+    cout << "Simulation Methods Course, 2019" << endl
+         << "#1 Assignment Molecular Dynamics (Brownian Dynamics) simulation"
+         << endl
+         << "Unoptimized version (slowest)" << endl;
+  }
 
   // Initialize and run simulation
   MD::Simulation sim(verbose, n_particles, dt,
