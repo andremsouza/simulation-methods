@@ -227,8 +227,9 @@ void MD::Simulation::runSimulation(int t_total_time, int t_echo_time,
     std::cout << "Run finished on: " << m_time_end.time_since_epoch().count()
               << std::endl;
   std::cout
-      << "Running time: "
+      << "Particles: " << m_n_particles << "; "
+      << "Running time (seconds): "
       << std::chrono::duration_cast<second_t>(m_time_end - m_time_begin).count()
-      << "s" << std::endl;
+      << std::endl;
   m_moviefile.close();
 }
