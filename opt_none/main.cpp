@@ -55,7 +55,6 @@ int main(int argc, char *argv[]) {
                      particle_particle_screening_length,
                      particle_driving_force);
   sim.runSimulation(total_time, echo_time, movie_time);
-  cout << "Simulation complete" << endl;
 
   return 0;
 }
