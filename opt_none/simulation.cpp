@@ -211,7 +211,7 @@ void MD::Simulation::runSimulation(int t_total_time, int t_echo_time,
     }
 
     // echo time
-    if (m_time % t_echo_time == 0) {
+    if (m_verbose && m_time % t_echo_time == 0) {
       std::cout << "Timestep: " << m_time << " / " << t_total_time << std::endl;
     }
 
