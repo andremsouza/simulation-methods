@@ -2,75 +2,6 @@
 
 #include "simulation.hpp"
 
-void MD::Simulation::calcPairwiseForces() {
-  for (int i = 0; i < m_n_particles; i++) {
-    for (int j = i + 1; j < m_n_particles; j++) {
-      // calculating squared distance between particles
-      double dx = m_particle_x[j] - m_particle_x[i];
-      double dy = m_particle_y[j] - m_particle_y[i];
-      double r2;
-
-      // PBC fold back
-      // if any distance is larger than half the box
-      // the copy in the neighboring box is closer
-      if (dx > m_half_sx) dx -= m_sx;
-      if (dx <= -m_half_sx) dx += m_sx;
-      if (dy > m_half_sy) dy -= m_sy;
-      if (dy <= -m_half_sy) dy += m_sy;
-
-      r2 = dx * dx + dy * dy;
-
-      // the particles are close enough to interact
-      if (r2 < INTERACTION_THRESHOLD) {
-        double r = sqrt(r2), f;
-
-        // If too close, raise warning and use a constant high force
-        if (r < MINIMUM_INTERACTION_DISTANCE) {
-          if (m_verbose)
-            std::cout << "WARNING:PARTICLES TOO CLOSE. LOWER CUTOFF FORCE USED"
-                      << std::endl;
-          f = TOO_CLOSE_FORCE;
-        } else {
-          // calculate the force
-          f = 1 / r2 * std::exp(-r / m_particle_particle_screening_length);
-        }
-
-        // projection to the x,y axes
-        f /= r;
-
-        m_particle_fx[i] -= f * dx;
-        m_particle_fy[i] -= f * dy;
-        m_particle_fx[j] += f * dx;
-        m_particle_fy[j] += f * dy;
-      }
-    }
-  }
-}
-
-void MD::Simulation::writeCMovieFrame() {
-  float floatholder;
-
-  // writing frame data to .mvi
-  // each frame will have the number of particles and the cycle number of the
-  // simulation
-  m_moviefile.write(reinterpret_cast<char *>(&m_n_particles), sizeof(int));
-  m_moviefile.write(reinterpret_cast<char *>(&m_time), sizeof(int));
-
-  // for each particle, write its color, number, position, and "existence" value
-  for (int i = 0; i < m_n_particles; i++) {
-    m_moviefile.write(reinterpret_cast<char *>(&(m_particle_color[i])),
-                      sizeof(int));
-    m_moviefile.write(reinterpret_cast<char *>(&i), sizeof(int));
-
-    floatholder = (float)m_particle_x[i];
-    m_moviefile.write(reinterpret_cast<char *>(&floatholder), sizeof(float));
-    floatholder = (float)m_particle_y[i];
-    m_moviefile.write(reinterpret_cast<char *>(&floatholder), sizeof(float));
-    floatholder = 1.0;  // cum_disp, c movie format
-    m_moviefile.write(reinterpret_cast<char *>(&floatholder), sizeof(float));
-  }
-}
-
 MD::Simulation::Simulation(bool t_verbose, int t_n_particles, double t_dt,
                            double t_particle_particle_screening_length,
                            double t_particle_driving_force)
@@ -172,6 +103,75 @@ MD::Simulation::Simulation(bool t_verbose, int t_n_particles, double t_dt,
   m_moviefile.open("./particles.mvi", std::fstream::binary | std::fstream::out |
                                           std::fstream::trunc);
   if (m_verbose) std::cout << "Output file opened successfully" << std::endl;
+}
+
+void MD::Simulation::calcPairwiseForces() {
+  for (int i = 0; i < m_n_particles; i++) {
+    for (int j = i + 1; j < m_n_particles; j++) {
+      // calculating squared distance between particles
+      double dx = m_particle_x[j] - m_particle_x[i];
+      double dy = m_particle_y[j] - m_particle_y[i];
+      double r2;
+
+      // PBC fold back
+      // if any distance is larger than half the box
+      // the copy in the neighboring box is closer
+      if (dx > m_half_sx) dx -= m_sx;
+      if (dx <= -m_half_sx) dx += m_sx;
+      if (dy > m_half_sy) dy -= m_sy;
+      if (dy <= -m_half_sy) dy += m_sy;
+
+      r2 = dx * dx + dy * dy;
+
+      // the particles are close enough to interact
+      if (r2 < INTERACTION_THRESHOLD) {
+        double r = sqrt(r2), f;
+
+        // If too close, raise warning and use a constant high force
+        if (r < MINIMUM_INTERACTION_DISTANCE) {
+          if (m_verbose)
+            std::cout << "WARNING:PARTICLES TOO CLOSE. LOWER CUTOFF FORCE USED"
+                      << std::endl;
+          f = TOO_CLOSE_FORCE;
+        } else {
+          // calculate the force
+          f = 1 / r2 * std::exp(-r / m_particle_particle_screening_length);
+        }
+
+        // projection to the x,y axes
+        f /= r;
+
+        m_particle_fx[i] -= f * dx;
+        m_particle_fy[i] -= f * dy;
+        m_particle_fx[j] += f * dx;
+        m_particle_fy[j] += f * dy;
+      }
+    }
+  }
+}
+
+void MD::Simulation::writeCMovieFrame() {
+  float floatholder;
+
+  // writing frame data to .mvi
+  // each frame will have the number of particles and the cycle number of the
+  // simulation
+  m_moviefile.write(reinterpret_cast<char *>(&m_n_particles), sizeof(int));
+  m_moviefile.write(reinterpret_cast<char *>(&m_time), sizeof(int));
+
+  // for each particle, write its color, number, position, and "existence" value
+  for (int i = 0; i < m_n_particles; i++) {
+    m_moviefile.write(reinterpret_cast<char *>(&(m_particle_color[i])),
+                      sizeof(int));
+    m_moviefile.write(reinterpret_cast<char *>(&i), sizeof(int));
+
+    floatholder = (float)m_particle_x[i];
+    m_moviefile.write(reinterpret_cast<char *>(&floatholder), sizeof(float));
+    floatholder = (float)m_particle_y[i];
+    m_moviefile.write(reinterpret_cast<char *>(&floatholder), sizeof(float));
+    floatholder = 1.0;  // cum_disp, c movie format
+    m_moviefile.write(reinterpret_cast<char *>(&floatholder), sizeof(float));
+  }
 }
 
 void MD::Simulation::runSimulation(int t_total_time, int t_echo_time,
