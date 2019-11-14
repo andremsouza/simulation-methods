@@ -13,6 +13,8 @@ jobs:
     - name: action-cpp-lint
       uses: CyberZHG/github-action-cpp-lint@0.0.2
     - uses: actions/checkout@v1
+    - name: Install OpenGL / FreeGlut
+      run: sudo apt-get update && sudo apt-get install freeglut3-dev binutils-gold g++ cmakelibglew-dev g++ mesa-common-dev build-essential libglew1.5-dev libglm-dev mesa-utils
     - name: make_opt_none
       run: make build_opt_none
     - name: make_opt_verlet
