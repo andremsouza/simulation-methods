@@ -11,21 +11,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "globaldata.h"
 #include "drawing.h"
+#include "globaldata.h"
 
+int main(int argc, char **argv) {
+  char filename[64];
 
-int main(int argc, char **argv)
-{
+  // read filename from stdin
+  fprintf(stdout, "MVI filename: ");
+  fscanf(stdin, "%s", filename);
 
-    initialize_global_data();
-    
-    read_moviefile_data();
-    
-    init_glut(&argc, argv);
-    init_OpenGl();
+  initialize_global_data(filename);
 
-    start_main_loop_glut();
-    
-    return 0;
+  read_moviefile_data();
+
+  init_glut(&argc, argv);
+  init_OpenGl();
+
+  start_main_loop_glut();
+
+  return 0;
 }
