@@ -152,26 +152,32 @@ void MD::Simulation::calcPairwiseForces() {
 
     // the particles are close enough to interact
     if (r2 < INTERACTION_THRESHOLD) {
-      double r = sqrt(r2), f;
+      double r, f;
+      double f_r;  // f_r == f / r
+      int r2_trunc = std::round(r2 * TABULATED_FORCES_PRECISION);
 
       // If too close, raise warning and use a constant high force
-      if (r < MINIMUM_INTERACTION_DISTANCE) {
+      if (r2 < MINIMUM_INTERACTION_DISTANCE_SQUARED) {
         if (m_verbose)
           std::cout << "WARNING:PARTICLES TOO CLOSE. LOWER CUTOFF FORCE USED"
                     << std::endl;
-        f = TOO_CLOSE_FORCE;
+        f_r = TOO_CLOSE_FORCE / sqrt(r2);
+      } else if (m_tab_forces.find(r2_trunc) != m_tab_forces.end()) {
+        // found key in mapping. assigning r and f to the values
+        f_r = m_tab_forces[r2_trunc];
       } else {
-        // calculate the force
+        // did not find the key in the mapping. calculating and adding to map
+        r = sqrt(r2);
         f = 1 / r2 * std::exp(-r / m_particle_particle_screening_length);
+        // projection to the x,y axes
+        f_r = f / r;
+        m_tab_forces[r2_trunc] = f_r;
       }
 
-      // projection to the x,y axes
-      f /= r;
-
-      m_particle_fx[i] -= f * dx;
-      m_particle_fy[i] -= f * dy;
-      m_particle_fx[j] += f * dx;
-      m_particle_fy[j] += f * dy;
+      m_particle_fx[i] -= f_r * dx;
+      m_particle_fy[i] -= f_r * dy;
+      m_particle_fx[j] += f_r * dx;
+      m_particle_fy[j] += f_r * dy;
     }
   }
 }

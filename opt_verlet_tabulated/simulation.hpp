@@ -8,13 +8,14 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 
 namespace MD {
 // Defining constants for simulation
 double constexpr PARTICLE_DENSITY = 800.0 / (60.0 * 60.0);
 double constexpr MINIMUM_PLACEMENT_DISTANCE = 0.25;
-double constexpr MINIMUM_INTERACTION_DISTANCE = 0.1;
+double constexpr MINIMUM_INTERACTION_DISTANCE_SQUARED = 0.1 * 0.1;
 double constexpr TOO_CLOSE_FORCE = 100.0;
 double constexpr INTERACTION_THRESHOLD = 16.0;
 double constexpr DIRECTION_PROBABILITY = 0.5;
@@ -23,6 +24,7 @@ double constexpr VERLET_CUTOFF_DISTANCE =
     36.0;  // verify relationship with box size
 double constexpr VERLET_GROWTH_RATIO = 1.1;
 double constexpr VERLET_RECOLORING_VALUE = 30;
+float constexpr TABULATED_FORCES_PRECISION = 10.0;  // 1000 == 3 decimal places
 
 // Simulation class
 // Defines and control simulation
@@ -68,6 +70,15 @@ class Simulation {
   bool m_flag_verlet_rebuild;
   std::vector<double> m_particle_dx_so_far;
   std::vector<double> m_particle_dy_so_far;
+
+  // tabulated forces table: maps r2 -> f/r
+  //
+  // when the pairwise forces would be calculated, the algorithm will instead
+  // search in the lookup table.
+  //
+  // if the mapping is not found, it will be inserted in the table for possible
+  // future lookups
+  std::unordered_map<int, double> m_tab_forces;
 
   // private methods
 
