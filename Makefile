@@ -13,15 +13,15 @@ build_opt_verlet_tabulated_debug:
 run_opt_none:
 	./opt_none/main $(ARGS)
 run_opt_none_default:
-	./opt_none/main true 800 0.001 4.0 0.5 100000 1000 100
+	./opt_none/main true 800
 run_opt_verlet:
 	./opt_verlet/main $(ARGS)
 run_opt_verlet_default:
-	./opt_verlet/main true 800 0.001 4.0 0.5 100000 1000 100
+	./opt_verlet/main true 800
 run_opt_verlet_tabulated:
 	./opt_verlet_tabulated/main $(ARGS)
 run_opt_verlet_tabulated_default:
-	./opt_verlet_tabulated/main true 800 0.001 4.0 0.5 100000 1000 100
+	./opt_verlet_tabulated/main true 800
 build_visualization:
 	g++ -o visualization/main visualization/main.cpp visualization/drawing.cpp visualization/globaldata.cpp -lGL -lGLU -lglut -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic
 build_visualization_debug:
