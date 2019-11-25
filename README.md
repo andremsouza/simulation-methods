@@ -13,6 +13,8 @@ See [Assignment_1_MD.pdf](Assignment_1_MD.pdf).
 
 ## Usage
 
+### Molecular dynamics
+
 Using [Makefile](Makefile):
 
 - `make build_opt_none` - compiles non-optimized code with g++.
