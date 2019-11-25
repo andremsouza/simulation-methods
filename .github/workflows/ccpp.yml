@@ -19,9 +19,13 @@ jobs:
       run: make build_opt_none
     - name: make_opt_verlet
       run: make build_opt_verlet
+    - name: make_opt_verlet_tabulated
+      run: make build_opt_verlet_tabulated
     - name: make_visualization
       run: make build_visualization
     - name: test_opt_none
       run: make run_opt_none_default
     - name: test_opt_verlet
       run: make run_opt_verlet_default
+    - name: test_opt_verlet_tabulated
+      run: make run_opt_verlet_tabulated_default
