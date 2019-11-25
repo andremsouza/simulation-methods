@@ -1,4 +1,12 @@
-.vscode
+# ignore compiled binaries
+/**/main
+
+# visual studio code files
+.vscode/*
+
+# test codes
+test/
+
+# output files
 *.out
 *.mvi
-*/main
