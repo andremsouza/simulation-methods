@@ -26,10 +26,10 @@ using namespace std;
 // Main function. Runs simulation with default arguments.
 int main(int argc, char *argv[]) {
   // Check number of arguments for the main program
-  if (argc != 9) {
-    cout << "usage: main VERBOSE_BOOL N_PARTICLES DT "
-            "PARTICLE_PARTICLE_SCREENING_LENGTH PARTICLE_DRIVING_FORCE "
-            "TOTAL_TIME ECHO_TIME MOVIE TIME"
+  if (argc != 3) {
+    cout << "usage: main VERBOSE_BOOL N_PARTICLES"
+         // "DT PARTICLE_PARTICLE_SCREENING_LENGTH PARTICLE_DRIVING_FORCE "
+         // "TOTAL_TIME ECHO_TIME MOVIE TIME"
          << endl;
     exit(1);
   }
@@ -37,12 +37,12 @@ int main(int argc, char *argv[]) {
   // Get arguments from command-line
   const bool verbose = !((strcmp(argv[1], "1") && strcmp(argv[1], "true")));
   const int n_particles = atoi(argv[2]);
-  const double dt = atof(argv[3]);
-  const double particle_particle_screening_length = atof(argv[4]);
-  const double particle_driving_force = atof(argv[5]);
-  const int total_time = atoi(argv[6]);
-  const int echo_time = atoi(argv[7]);
-  const int movie_time = atoi(argv[8]);
+  // const double dt = atof(argv[3]);
+  // const double particle_particle_screening_length = atof(argv[4]);
+  // const double particle_driving_force = atof(argv[5]);
+  // const int total_time = atoi(argv[6]);
+  // const int echo_time = atoi(argv[7]);
+  // const int movie_time = atoi(argv[8]);
 
   // Output general information
   if (verbose) {
@@ -53,10 +53,8 @@ int main(int argc, char *argv[]) {
   }
 
   // Initialize and run simulation
-  MD::Simulation sim(verbose, n_particles, dt,
-                     particle_particle_screening_length,
-                     particle_driving_force);
-  sim.runSimulation(total_time, echo_time, movie_time);
+  MD::Simulation sim(verbose, n_particles);
+  sim.runSimulation();
 
   return 0;
 }
