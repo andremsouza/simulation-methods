@@ -17,15 +17,22 @@ jobs:
       run: sudo apt-get update && sudo apt-get install mesa-utils freeglut3-dev
     - name: make_opt_none
       run: make build_opt_none
+      working-directory: ./assignment1_md
     - name: make_opt_verlet
       run: make build_opt_verlet
+      working-directory: ./assignment1_md
     - name: make_opt_verlet_tabulated
       run: make build_opt_verlet_tabulated
+      working-directory: ./assignment1_md
     - name: make_visualization
       run: make build_visualization
+      working-directory: ./assignment1_md
     - name: test_opt_none
       run: make run_opt_none_default
+      working-directory: ./assignment1_md
     - name: test_opt_verlet
       run: make run_opt_verlet_default
+      working-directory: ./assignment1_md
     - name: test_opt_verlet_tabulated
       run: make run_opt_verlet_tabulated_default
+      working-directory: ./assignment1_md
