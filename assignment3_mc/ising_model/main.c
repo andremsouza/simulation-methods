@@ -241,7 +241,7 @@ void write_out_result() {
   // printf("T = %lf |M| = %lf <M>*<M> = %lf <M^2> = %lf chi = %lf
   // \n",T,fabs(M_avg),M_avg*M_avg,M2_avg,chi);
 
-  printf("T = %lf |M| = %lf chi = %lf\n", T, fabs(M_avg), chi);
+  printf("%lf,%lf,%lf,%lf,%lf\n", T, fabs(M_avg), fabs(E_avg), chi, cv);
 }
 
 void write_cmovie() {
@@ -293,6 +293,8 @@ int main(int argc, const char *argv[]) {
 
   spin_initialization();
   printf("Run started\n");
+  // T, fabs(M_avg), fabs(E_avg), chi, cv)
+  printf("T,|M|,|E|,chi,cv\n");
   while (T <= 4.0) {
     // the reason the spin initialization is not in the loop
     // is that subsequent temperatures have similar states in
