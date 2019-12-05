@@ -6,6 +6,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <iostream>
+#include <limits>
+
+using namespace std;
+typedef std::numeric_limits<double> dbl;
 
 #define L_max 100
 
@@ -148,10 +153,10 @@ int delta_E(int fi, int fj) {
 }
 
 // flips spin (on the position: to_be_flipped_i,to_be_flipped_j)
-void flip_spin(to_be_flipped_i, to_be_flipped_j) {
-  spin[to_be_flipped_i][to_be_flipped_j] =
-      -spin[to_be_flipped_i][to_be_flipped_j];
-}
+// void flip_spin(to_be_flipped_i, to_be_flipped_j) {
+// spin[to_be_flipped_i][to_be_flipped_j] =
+//     -spin[to_be_flipped_i][to_be_flipped_j];
+// }
 
 void calculate_statistics() {
   double M, M2, E, E2;
@@ -197,7 +202,9 @@ void run_for_fixed_T() {
     if (dE <= 0) {
       // if the energy is lowered then ALWAYS make the step
       // flip the spin if that lowers the energy
-      flip_spin(to_be_flipped_i, to_be_flipped_j);
+      // flip_spin(to_be_flipped_i, to_be_flipped_j);
+      spin[to_be_flipped_i][to_be_flipped_j] =
+          -spin[to_be_flipped_i][to_be_flipped_j];
     }
 
     else {
@@ -209,7 +216,11 @@ void run_for_fixed_T() {
 
       r = rand() / (RAND_MAX + 1.0);  // random number from 0..1
 
-      if (r < p) flip_spin(to_be_flipped_i, to_be_flipped_j);
+      if (r < p) {
+        spin[to_be_flipped_i][to_be_flipped_j] =
+            -spin[to_be_flipped_i][to_be_flipped_j];
+      }
+      // flip_spin(to_be_flipped_i, to_be_flipped_j);
       // this is when we do the flip
       else
         N_rej++;  // otherwise I reject the move
@@ -240,7 +251,10 @@ void write_out_result() {
 
   // printf("T = %lf |M| = %lf <M>*<M> = %lf <M^2> = %lf chi = %lf
   // \n",T,fabs(M_avg),M_avg*M_avg,M2_avg,chi);
-  printf("%lf,%lf,%lf,%lf,%lf\n", T, fabs(M_avg), fabs(E_avg), chi, cv);
+  cout.precision(dbl::max_digits10);
+  cout << T << "," << fabs(M_avg) << "," << fabs(E_avg) << "," << chi << ","
+       << cv << endl;
+  // printf("%lf,%lf,%lf,%lf,%lf\n", T, fabs(M_avg), fabs(E_avg), chi, cv);
 }
 
 void write_cmovie() {
