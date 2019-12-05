@@ -34,7 +34,7 @@ void initialize_global_data(char *filename) {
   global.radius_vertex = 0.01;
   global.radius_particle = 0.02;
 
-  strcpy(global.moviefilename, "particles.mvi");
+  // strcpy(global.moviefilename, "particles.mvi");
 
   global.N_frames = 0;
   global.current_frame = 0;
