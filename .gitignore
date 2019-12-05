@@ -1,5 +1,14 @@
 # ignore compiled binaries
-/**/main
+*
+!/**/
+!*.*
+
+# allow makefile
+!/**/Makefile
+
+# output text files
+*.txt
+*.dat
 
 # visual studio code files
 .vscode/*
