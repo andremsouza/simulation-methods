@@ -19,3 +19,8 @@ test/
 # output files
 *.out
 *.mvi
+
+# CLion files
+.idea/*
+/cmake-build-debug/
+CMakeLists.txt
