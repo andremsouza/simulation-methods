@@ -32,7 +32,7 @@ statistics = {
 # %%
 plt_idx = 1
 sns.set()
-fig, ax = plt.subplots(figsize=(25, 25))
+fig, ax = plt.subplots(figsize=(50, 50))
 fig.suptitle("Average force in each simulation", fontsize=16)
 
 for idx, force in enumerate(forces):
