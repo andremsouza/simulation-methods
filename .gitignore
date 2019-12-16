@@ -11,7 +11,7 @@
 *.dat
 
 # visual studio code files
-.vscode/*
+.vscode/
 
 # test codes
 test/
@@ -21,6 +21,10 @@ test/
 *.mvi
 
 # CLion files
-.idea/*
+.idea/
 /cmake-build-debug/
 CMakeLists.txt
+
+# Linter/formatter/testing files
+.mypy_cache/
+.pytest_cache/
