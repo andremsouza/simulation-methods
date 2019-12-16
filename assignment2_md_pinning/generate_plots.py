@@ -39,6 +39,7 @@ for idx, force in enumerate(forces):
     ax = plt.subplot(len(sizes) + 1, len(forces), plt_idx)
     ax.set_title("statistics_0.txt")
     sns.lineplot(x=statistics[0][0][:, 0], y=statistics[0][0][:, 1])
+    plt.xlim([0, 2.0])
     plt_idx += 1
 
 for size in sorted(list(statistics.keys())[:-1]):
@@ -46,6 +47,7 @@ for size in sorted(list(statistics.keys())[:-1]):
         ax = plt.subplot(len(sizes) + 1, len(forces), plt_idx)
         ax.set_title("statistics_" + str(size) + "_" + str(int(force)) + ".txt")
         sns.lineplot(x=statistics[size][force][:, 0], y=statistics[size][force][:, 1])
+        plt.ylim([0, 2.0])
         plt_idx += 1
 plt.savefig(directory + "output_graphs.png")
 plt.show()
