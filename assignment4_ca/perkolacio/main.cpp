@@ -4,8 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <algorithm>
+#include <iostream>
+#include <vector>
 
-#define N_grid 100
+#define N_grid 250
+#define N_ITERATIONS 100
 
 int grid[N_grid][N_grid];  // holding the particles (perconalted sites)
 int cluster_number[N_grid][N_grid];  // hold the cluster number
@@ -16,7 +20,6 @@ int actual_cluster;
 // double p;  /// probability of picking the site
 
 FILE *moviefile;
-int t;
 
 void initialize_system() {
   int i, j;
@@ -45,7 +48,7 @@ void fill_system_with_probability(double p) {
         N_particles++;
       }
     }
-  printf("Filled up the system.Ended up with %d particles \n", N_particles);
+  // printf("Filled up the system.Ended up with %d particles \n", N_particles);
 }
 
 void recursive_clusternumber(int i, int j) {
@@ -89,7 +92,7 @@ void clusterize_system() {
   actual_cluster--;  // to get the actual number of clusters
 }
 
-void write_cmovie() {
+void write_cmovie(int t) {
   int i, j;
   float floatholder;
   int intholder;
@@ -120,32 +123,72 @@ void write_cmovie() {
     }
 }
 
-int main(int argc, const char *argv[]) {
-  printf("Percolation calculation \n");
+int findMaxClusterSize() {
+  if (!actual_cluster) return 0;
+  std::vector<int> clusters(actual_cluster, 0);
+
+  for (int i = 0; i < N_grid; i++) {
+    for (int j = 0; j < N_grid; j++) {
+      if (cluster_number[i][j] >= 1) {
+        clusters[cluster_number[i][j] - 1]++;
+      }
+    }
+  }
+  return *std::max_element(std::begin(clusters), std::end(clusters));
+}
+
+int hasSpanningCluster() {
+  for (int i = 0; i < N_grid; i++) {
+    for (int j = 0; j < N_grid; j++) {
+      if ((cluster_number[0][i] != -1 &&
+           cluster_number[0][i] == cluster_number[N_grid - 1][j]) ||
+          (cluster_number[i][0] != -1 &&
+           cluster_number[i][0] == cluster_number[j][N_grid - 1])) {
+        return 1;
+      }
+    }
+  }
+  return 0;
+}
+
+// int main(int argc, const char *argv[]) {
+int main() {
+  // printf("Percolation calculation \n");
 
   // probability of occupying a given site: p
   // p = 0.6;
-  double p = 0.6;
-  t = 0;
 
   moviefile = fopen("perk.mvi", "wb");
+  std::cout << "n_grid,p,avg_max_cluster,probability_spanning_cluster"
+            << std::endl;
+  for (double i = 0; i < 1.01; i += 0.01) {
+    double p = i;
+    double avg_max_cluster = 0.0;
+    double spanning_probability = 0.0;
+    for (int t = 0; t < N_ITERATIONS; t++) {
+      // srand(1446742268);
+      int seed = (int)time(NULL) + t * 10;
+      // printf("%d seed=%d\n", t, seed);
+      srand(seed);
 
-  for (t = 0; t < 100; t++) {
-    // srand(1446742268);
-    int seed = (int)time(NULL) + t * 10;
-    printf("%d seed=%d\n", t, seed);
-    srand(seed);
+      initialize_system();
+      fill_system_with_probability(p);
 
-    initialize_system();
-    fill_system_with_probability(p);
+      clusterize_system();
+      write_cmovie(t);
 
-    // right here I can calculate statistics
-    // - size of the largest cluster (averaged)
-    // - probability of a spanning cluster in the system (probability of
-    // percolation)
+      // right here I can calculate statistics
+      // - size of the largest cluster (average)
+      avg_max_cluster += findMaxClusterSize();
+      // - probability of a spanning cluster in the system (probability of
+      // percolation)
+      spanning_probability += hasSpanningCluster();
+    }
+    avg_max_cluster /= N_ITERATIONS;
+    spanning_probability /= N_ITERATIONS;
 
-    clusterize_system();
-    write_cmovie();
+    std::cout << N_grid << "," << p << "," << avg_max_cluster << ","
+              << spanning_probability << std::endl;
   }
 
   fclose(moviefile);

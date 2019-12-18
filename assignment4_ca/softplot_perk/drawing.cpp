@@ -210,7 +210,7 @@ void display_function() {
   } else
     global.current_frame = 0;
 
-  usleep(500000);
+  getchar();
 }
 
 void reshape_function(int w, int h) {
